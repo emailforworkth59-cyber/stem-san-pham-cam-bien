@@ -19,9 +19,14 @@
   },
   "homepage": "https://github.com/emailforworkth59-cyber/stem-san-pham-cam-bien#readme",
   "dependencies": {
-    "dotnet": "^1.1.4",
+    "chart.js": "^4.5.1",
+    "dotenv": "^17.3.1",
     "ejs": "^4.0.1",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "mqtt": "^5.15.0",
+    "mysql2": "^3.18.2",
+    "telegraf": "^4.16.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

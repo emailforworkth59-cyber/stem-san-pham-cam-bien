@@ -9,5 +9,5 @@ router.post("/register", authController.register);
 router.get("/logout", authController.logout);
 router.get("/", isAuth, plantController.renderDashboard);
 router.post("/api/sensor-data", plantController.handleSensorData);
-
+router.get("/api/plants-status", plantController.getApiStatus);
 module.exports = router;

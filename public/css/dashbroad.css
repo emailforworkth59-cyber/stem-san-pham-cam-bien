@@ -1,0 +1,14 @@
+body {
+  background-color: #f8f9fa;
+  /* background-color: #171715; */
+}
+.card-soil {
+  transition: transform 0.2s;
+  border-radius: 15px;
+}
+.card-soil:hover {
+  transform: scale(1.02);
+}
+.status-badge {
+  font-size: 1.1rem;
+}

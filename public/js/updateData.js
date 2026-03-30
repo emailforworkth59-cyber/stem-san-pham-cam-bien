@@ -16,14 +16,14 @@ async function updateDashboard() {
       }
       const statusEl = document.getElementById(`status-${plant.device_id}`);
       if (statusEl) {
-        let statusText = "🟢 Ổn định";
+        let statusText = "Ổn định";
         let colorClass = "text-success";
 
         if (plant.soil_percent < plant.min_threshold) {
-          statusText = "🔴 Quá khô";
+          statusText = "Quá khô";
           colorClass = "text-danger";
         } else if (plant.soil_percent > plant.max_threshold) {
-          statusText = "🟡 Quá ướt";
+          statusText = "Quá ướt";
           colorClass = "text-warning";
         }
 

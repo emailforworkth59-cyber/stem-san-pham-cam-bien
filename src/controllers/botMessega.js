@@ -1,21 +1,50 @@
 const TelegramBot = require("node-telegram-bot-api");
-
 const token = process.env.BOT_TOKEN;
 const chatId = process.env.CHAT_ID;
-
-const bot = new TelegramBot(token, { polling: false });
+const bot = token ? new TelegramBot(token, { polling: false }) : null;
 
 const botMessage = {
-  sendWarning: (plantName, percent) => {
-    const message = `⚠️ [11A7 - CẢNH BÁO]\n🌿 Cây: ${plantName}\n💧 Độ ẩm hiện tại: ${percent}%\n❗ Trạng thái: QUÁ KHÔ! Hãy tưới nước ngay.`;
+  /**
+   * @param {string} tenCay
+   * @param {number} doAm
+   * @param {string} loaiCanhBao
+   */
+  guiThongBao: (tenCay, doAm, loaiCanhBao) => {
+    if (!bot || !chatId) return;
+    const thoiGian = new Date().toLocaleString("vi-VN");
+    let tieuDe = "";
+    let huongDan = "";
 
+    if (loaiCanhBao === "KHO") {
+      tieuDe = "CANH BAO: DO AM THAP";
+      huongDan = "Hanh dong: Kich hoat thiet bi tuoi nuoc.";
+    } else if (loaiCanhBao === "UOT") {
+      tieuDe = "CANH BAO: DO AM QUA CAO";
+      huongDan = "Hanh dong: Kiem tra thoat nuoc bon cay.";
+    } else {
+      tieuDe = "HE THONG: TRANG THAI ON DINH";
+      huongDan = "Hanh dong: Tiep tuc theo doi.";
+    }
+    const tinNhan = `
+THONG BAO HE THONG - 11A7
+----------------------------
+SU KIEN: ${tieuDe}
+THIET BI: ${tenCay}
+CHI SO: ${doAm}%
+THOI GIAN: ${thoiGian}
+----------------------------
+GHI CHU: ${huongDan}
+    `.trim();
     bot
-      .sendMessage(chatId, message)
-      .then(() => console.log("✅ Đã gửi cảnh báo qua Telegram"))
-      .catch((error) => console.error("❌ Lỗi gửi Telegram:", error));
+      .sendMessage(chatId, tinNhan)
+      .then(() => console.log(`[Telegram] Da gui bao cao: ${loaiCanhBao}`))
+      .catch((err) => console.error(" [Telegram] Loi:", err.message));
   },
-  sendSystemStart: () => {
-    bot.sendMessage(chatId, "🚀 Hệ thống giám sát 11A7 đã trực tuyến!");
+
+  baoHeThongOnline: () => {
+    if (bot && chatId) {
+      bot.sendMessage(chatId, "HE THONG GIAM SAT 11A7: KHOI DONG THANH CONG");
+    }
   },
 };
 

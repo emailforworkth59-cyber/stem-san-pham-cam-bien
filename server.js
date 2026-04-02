@@ -22,6 +22,4 @@ app.use("/", webRoutes);
 
 const PORT = process.env.PORT || 8080;
 // console.log();
-app.listen(PORT, () =>
-  console.log(`Server MVC Ready at http://localhost:${PORT}`),
-);
+app.listen(PORT, () => console.log(`http://localhost:${PORT}`));

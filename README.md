@@ -53,8 +53,9 @@ Yêu cầu môi trường:
 Các bước cài đặt:
 
 1. Clone kho lưu trữ:
-   git clone https://github.com/your-username/greenguard-iot.git
-
+   git clone https://github.com/emailforworkth59-cyber/stem-san-pham-cam-bien.git
+   Cho phần cứng( LƯU Ý: Nên chuyển qua 1 folder mới để clone về)
+   git clone https://github.com/HieuTrung0937/IoT_project.git
 2. Cài đặt các thư viện Node.js cần thiết (tại thư mục gốc dự án):
    npm install
 

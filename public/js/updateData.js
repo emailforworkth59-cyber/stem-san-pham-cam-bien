@@ -42,3 +42,9 @@ async function updateDashboard() {
 
 updateDashboard();
 setInterval(updateDashboard, 3000);
+
+// PHAN THEM MOI: Tu dong tai lai toan bo trang web (F5)
+// Vi du: Tai lai trang sau moi 30 phut (1.800.000 milliseconds)
+setInterval(function () {
+  window.location.reload();
+}, 1000);

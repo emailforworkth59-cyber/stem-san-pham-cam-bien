@@ -784,21 +784,68 @@ body {
   background: var(--white);
 }
 
-/* ─── Responsive ─── */
 @media (max-width: 576px) {
   .station-img-col img {
-    min-height: 180px;
+    min-height: 200px;
+    height: 200px;
   }
+
+  .station-body {
+    padding: 20px 16px;
+  }
+
   .metrics-row {
     grid-template-columns: 1fr 1fr;
+    gap: 12px;
   }
+
+  .metric-tile-val {
+    font-size: 2rem;
+  }
+
+  .metric-tile-label {
+    font-size: 0.8rem;
+  }
+
+  .status-banner {
+    padding: 12px 14px;
+    font-size: 0.85rem;
+  }
+
   .threshold-row {
     flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
   }
+
+  .threshold-field {
+    height: 48px;
+  }
+
+  .threshold-lbl {
+    height: 100%;
+    font-size: 0.75rem;
+    padding: 0 12px;
+  }
+
+  .threshold-input {
+    height: 100%;
+    font-size: 1.1rem !important;
+  }
+
   .btn-save-threshold {
     flex: 0 0 100%;
-    margin-top: 6px;
+    height: 48px;
+    margin-top: 8px;
+    font-size: 0.9rem !important;
   }
+
+  .btn-chart-toggle {
+    padding: 12px;
+    font-size: 0.9rem;
+    height: 48px;
+  }
+
   .page-header {
     flex-direction: column;
     gap: 12px;

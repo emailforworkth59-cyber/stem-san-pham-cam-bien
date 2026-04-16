@@ -32,8 +32,10 @@ const plantController = {
           await Plant.saveReading(plant.id, soil_percent);
           if (soil_percent < plant.min_threshold) {
             botMessage.guiThongBao(plant.plant_name, soil_percent, "KHO");
+            console.log("KHo");
           } else if (soil_percent > plant.max_threshold) {
             botMessage.guiThongBao(plant.plant_name, soil_percent, "UOT");
+            console.log("Uot");
           }
         }
       }

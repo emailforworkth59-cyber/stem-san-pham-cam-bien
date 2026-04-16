@@ -5,142 +5,206 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trang Chủ - Hệ Thống Giám Sát IoT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="/css/dashbroad.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
-    <nav class="navbar bg-white py-3 mb-4 shadow-sm">
-      <div class="container d-flex justify-content-between align-items-center max-w-720">
-        <span class="navbar-brand mb-0 h5 fw-bold text-dark">
-          <i class="fa-solid fa-leaf text-success me-2"></i>Nông Trại Thông Minh
+
+    <!-- ── Navbar ── -->
+    <nav class="navbar bg-white py-3 shadow-sm">
+      <div class="container max-w-720">
+        <span class="navbar-brand mb-0">
+          <div class="brand-icon">
+            <i class="fa-solid fa-leaf"></i>
+          </div>
+          Nông Trại Thông Minh
         </span>
-        <a href="/logout" class="text-danger text-decoration-none" style="font-size: 0.9rem;">
-          <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>Đăng xuất
+        <a href="/logout" class="logout-link">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất
         </a>
       </div>
     </nav>
 
+    <!-- ── Main Content ── -->
     <div class="container max-w-720 mb-5">
-      <div class="d-flex justify-content-between align-items-center mb-4">
+
+      <!-- Page Header -->
+      <div class="page-header">
         <div>
-          <h4 class="fw-bold mb-1">Thiết Bị Của Tôi</h4>
-          <span class="text-secondary" style="font-size: 0.9rem;">Đang giám sát <%= plants ? plants.length : 0 %> trạm</span>
+          <h4 class="fw-bold mb-2">Thiết Bị Của Tôi</h4>
+          <span class="station-count-badge">
+            Đang giám sát <%= plants ? plants.length : 0 %> trạm
+          </span>
         </div>
-        
-        <a href="/plants/select" class="btn btn-submit px-3 py-2 shadow-sm" style="font-size: 0.95rem;">
-          <i class="fa-solid fa-plus me-1"></i> Thêm Trạm
+        <a href="/plants/select" class="btn btn-submit shadow-sm">
+          <i class="fa-solid fa-plus"></i> Thêm Trạm
         </a>
       </div>
 
+      <!-- ── Station List ── -->
       <% if (plants && plants.length > 0) { %>
         <div class="row g-3">
-          <% plants.forEach(function(plant) { %>
-            <div class="col-12">
-              <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
-                <div class="row g-0">
-                  <div class="col-4">
-                    <img src="<%= plant.image_url %>" alt="Ảnh cây" style="width: 100%; height: 100%; object-fit: cover;">
-                  </div>
-                  <div class="col-8">
-                    <div class="card-body py-2 px-3">
-                      <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                          <h5 class="fw-bold text-dark mb-0"><%= plant.plant_name %></h5>
-                          <small class="text-muted"><%= plant.device_id %> | <%= plant.type_name %></small>
-                          
-                          <div class="mt-1" style="font-size: 0.85rem;">
-                            <span class="fw-bold text-primary">Độ ẩm: <span id="moisture-val-<%= plant.device_id %>"><%= plant.soil_percent !== null ? plant.soil_percent : '--' %></span>%</span>
-                          </div>
-                          <div class="text-muted" style="font-size: 0.7rem;">
-                            Cập nhật: <span id="time-<%= plant.device_id %>"><%= plant.timestamp ? new Date(plant.timestamp).toLocaleString("vi-VN") : '--' %></span>
-                          </div>
+          <% plants.forEach(function(plant) {
+            const pct = plant.soil_percent;
+            const hasData = pct !== null && pct !== undefined;
+            const isLow  = hasData && pct < plant.min_threshold;
+            const isHigh = hasData && pct > plant.max_threshold;
+            const isOk   = hasData && !isLow && !isHigh;
+            const barPct = hasData ? Math.min(100, Math.max(0, pct)) : 0;
+            const minBarLeft = Math.min(100, Math.max(0, plant.min_threshold));
+            const maxBarLeft = Math.min(100, Math.max(0, plant.max_threshold));
+          %>
+          <div class="col-12">
+            <div class="station-card">
+              <div class="row g-0">
+
+                <!-- Image -->
+                <div class="col-4 station-img-col">
+                  <img src="<%= plant.image_url %>" alt="<%= plant.plant_name %>" loading="lazy" />
+                  <div class="img-overlay"></div>
+                </div>
+
+                <!-- Body -->
+                <div class="col-8">
+                  <div class="station-body">
+
+                    <!-- Header -->
+                    <div class="station-header">
+                      <div>
+                        <div class="station-name"><%= plant.plant_name %></div>
+                        <div class="station-meta"><%= plant.device_id %> · <%= plant.type_name %></div>
+                      </div>
+                      <div class="station-actions">
+                        <span class="badge-online">Online</span>
+                        <form action="/plants/delete/<%= plant.id %>" method="POST"
+                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa trạm này? Toàn bộ dữ liệu sẽ bị mất vĩnh viễn.');"
+                          style="margin:0;">
+                          <button type="submit" class="btn-delete" title="Xóa trạm">
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+
+                    <!-- Metrics -->
+                    <div class="metrics-row">
+                      <div class="metric-tile">
+                        <div class="metric-tile-label">Độ ẩm đất</div>
+                        <div class="metric-tile-val
+                          <%= !hasData ? 'val-dash' : isLow ? 'val-warn' : isHigh ? 'val-caution' : 'val-ok' %>"
+                          id="moisture-val-<%= plant.device_id %>">
+                          <%= hasData ? pct : '—' %>
+                          <% if (hasData) { %><span style="font-size:0.75rem;opacity:0.6;">%</span><% } %>
                         </div>
-                        
-                        <div class="d-flex align-items-center gap-2">
-                          <span class="badge bg-success" style="font-size: 0.7rem;">Online</span>
-                          
-                          <form action="/plants/delete/<%= plant.id %>" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa trạm giám sát này? Toàn bộ dữ liệu đo sẽ bị mất vĩnh viễn.');" style="margin: 0;">
-                            <button type="submit" class="btn btn-sm btn-outline-danger border-0" title="Xóa trạm này">
-                              <i class="fa-solid fa-trash"></i>
-                            </button>
-                          </form>
+                        <div class="metric-tile-time" id="time-<%= plant.device_id %>">
+                          <%= plant.timestamp ? new Date(plant.timestamp).toLocaleString("vi-VN") : 'Chưa có dữ liệu' %>
                         </div>
                       </div>
-                      
-                      <div class="mt-2">
-                        <div id="status-<%= plant.device_id %>" class="alert 
-                          <% if (plant.soil_percent === null || plant.soil_percent === undefined) { %>alert-secondary<% } 
-                          else if (plant.soil_percent < plant.min_threshold) { %>alert-danger<% } 
-                          else if (plant.soil_percent > plant.max_threshold) { %>alert-warning<% } 
-                          else { %>alert-success<% } %> 
-                          py-2 text-center fw-bold fs-6 mb-2" style="border-width: 2px;">
-                          <% if (plant.soil_percent === null || plant.soil_percent === undefined) { %>CHƯA CÓ DỮ LIỆU
-                          <% } else if (plant.soil_percent < plant.min_threshold) { %>CẦN TƯỚI NƯỚC GẤP!
-                          <% } else if (plant.soil_percent > plant.max_threshold) { %>QUÁ ẨM (NGƯNG TƯỚI)
-                          <% } else { %>ĐẤT TỐT - BÌNH THƯỜNG<% } %>
+                      <div class="metric-tile">
+                        <div class="metric-tile-label">Ngưỡng cài</div>
+                        <div style="display:flex;align-items:baseline;gap:4px;margin-top:2px;">
+                          <span style="font-size:0.68rem;color:var(--neutral-500);font-weight:600;">MIN</span>
+                          <span style="font-size:1rem;font-weight:600;font-family:'DM Mono',monospace;color:var(--green-700);"><%= plant.min_threshold %>%</span>
+                          <span style="font-size:0.68rem;color:var(--neutral-300,#d1d5db);">·</span>
+                          <span style="font-size:0.68rem;color:var(--neutral-500);font-weight:600;">MAX</span>
+                          <span style="font-size:1rem;font-weight:600;font-family:'DM Mono',monospace;color:var(--amber-600);"><%= plant.max_threshold %>%</span>
                         </div>
-
-                        <div class="mt-3 pt-2 border-top">
-                          <form action="/plants/update-threshold/<%= plant.id %>" method="POST" class="row g-2 align-items-center">
-                            <div class="col-4">
-                              <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-light border-0" style="font-size: 0.7rem; color: #666;">Min</span>
-                                <input type="number" name="min_threshold" class="form-control border-0 bg-light fw-bold" value="<%= plant.min_threshold %>" style="font-size: 0.85rem;">
-                              </div>
-                            </div>
-                            <div class="col-4">
-                              <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-light border-0" style="font-size: 0.7rem; color: #666;">Max</span>
-                                <input type="number" name="max_threshold" class="form-control border-0 bg-light fw-bold" value="<%= plant.max_threshold %>" style="font-size: 0.85rem;">
-                              </div>
-                            </div>
-                            <div class="col-4 text-end">
-                              <button type="submit" class="btn btn-sm btn-success w-100 py-1 fw-bold shadow-sm" style="font-size: 0.8rem; border-radius: 6px;">
-                                LƯU
-                              </button>
-                            </div>
-                          </form>
-                        </div>
-                        
-                        <div class="mt-2 text-center">
-                          <button class="btn btn-outline-info btn-sm w-100 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseChart-<%= plant.device_id %>" aria-expanded="false" style="font-size: 0.8rem;">
-                            <i class="fa-solid fa-chart-line me-1"></i> Xem Biểu Đồ Độ Ẩm
-                          </button>
-                        </div>
-
-                        <div class="collapse mt-2" id="collapseChart-<%= plant.device_id %>">
-                          <div class="card card-body p-1 border-info shadow-sm bg-light">
-                            <canvas id="chart-<%= plant.device_id %>" width="400" height="200"></canvas>
-                          </div>
-                        </div>
-                        </div>
+                        <div class="metric-tile-sub">Phạm vi hoạt động</div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+
+                    <!-- Moisture bar -->
+                    <div class="moisture-bar-wrap">
+                      <div class="moisture-bar-header">
+                        <span class="moisture-bar-label">Mức độ ẩm</span>
+                        <span class="moisture-bar-pct"><%= hasData ? pct + '%' : 'N/A' %></span>
+                      </div>
+                      <div class="moisture-track">
+                        <!-- Zone markers -->
+                        <div class="moisture-zone-min" style="left:<%= minBarLeft %>%;"></div>
+                        <div class="moisture-zone-max" style="left:<%= maxBarLeft %>%;"></div>
+                        <!-- Fill -->
+                        <div class="moisture-fill <%= isLow ? 'fill-warn' : isHigh ? 'fill-caution' : '' %>"
+                          style="width:<%= barPct %>%;"></div>
+                      </div>
+                    </div>
+
+                    <!-- Status Banner -->
+                    <div id="status-<%= plant.device_id %>"
+                      class="status-banner
+                        <%= !hasData ? 'status-no-data' : isLow ? 'status-danger' : isHigh ? 'status-warning' : 'status-success' %>">
+                      <% if (!hasData) { %>
+                        <i class="fa-solid fa-circle-question fa-xs"></i> Chưa có dữ liệu
+                      <% } else if (isLow) { %>
+                        <i class="fa-solid fa-droplet fa-xs"></i> Cần tưới nước gấp!
+                      <% } else if (isHigh) { %>
+                        <i class="fa-solid fa-triangle-exclamation fa-xs"></i> Quá ẩm — ngưng tưới
+                      <% } else { %>
+                        <i class="fa-solid fa-circle-check fa-xs"></i> Đất tốt — bình thường
+                      <% } %>
+                    </div>
+
+                    <!-- Threshold form -->
+                    <form action="/plants/update-threshold/<%= plant.id %>" method="POST">
+                      <div class="threshold-row">
+                        <div class="threshold-field">
+                          <span class="threshold-lbl">Min</span>
+                          <input type="number" name="min_threshold" class="threshold-input"
+                            value="<%= plant.min_threshold %>" min="0" max="100" />
+                          <span class="threshold-unit">%</span>
+                        </div>
+                        <div class="threshold-field">
+                          <span class="threshold-lbl">Max</span>
+                          <input type="number" name="max_threshold" class="threshold-input"
+                            value="<%= plant.max_threshold %>" min="0" max="100" />
+                          <span class="threshold-unit">%</span>
+                        </div>
+                        <button type="submit" class="btn btn-save-threshold">Lưu</button>
+                      </div>
+                    </form>
+
+                    <!-- Chart toggle -->
+                    <button class="btn-chart-toggle" type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#collapseChart-<%= plant.device_id %>"
+                      aria-expanded="false">
+                      <i class="fa-solid fa-chart-line"></i> Xem Biểu Đồ Độ Ẩm
+                    </button>
+
+                    <div class="collapse" id="collapseChart-<%= plant.device_id %>">
+                      <div class="chart-collapse-body">
+                        <canvas id="chart-<%= plant.device_id %>" width="400" height="180"></canvas>
+                      </div>
+                    </div>
+
+                  </div><!-- /station-body -->
+                </div><!-- /col-8 -->
+
+              </div><!-- /row -->
+            </div><!-- /station-card -->
+          </div><!-- /col-12 -->
           <% }); %>
         </div>
+
       <% } else { %>
-        <div class="card border-0 shadow-sm text-center py-5" style="border-radius: 12px;">
-          <div class="card-body">
-            <div class="mb-3">
-              <i class="fa-solid fa-seedling text-success opacity-50" style="font-size: 3rem;"></i>
-            </div>
-            <h5 class="fw-bold text-dark">Chưa có dữ liệu</h5>
-            <p class="text-secondary mb-4">Bạn chưa cấu hình trạm giám sát nào cho khu vườn của mình.</p>
-            <a href="/plants/select" class="btn btn-outline-success px-4 py-2 fw-semibold">
-              <i class="fa-solid fa-plus me-2"></i>Bắt đầu thêm trạm đầu tiên
-            </a>
+        <!-- Empty State -->
+        <div class="empty-state-card">
+          <div class="empty-state-icon">
+            <i class="fa-solid fa-seedling"></i>
           </div>
+          <h5>Chưa có trạm nào</h5>
+          <p>Bạn chưa cấu hình trạm giám sát nào cho khu vườn của mình.</p>
+          <a href="/plants/select" class="btn btn-submit px-4">
+            <i class="fa-solid fa-plus me-1"></i> Bắt đầu thêm trạm đầu tiên
+          </a>
         </div>
       <% } %>
-    </div>
+
+    </div><!-- /container -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script src="/js/updateData.js"></script>
   </body>
 </html>
